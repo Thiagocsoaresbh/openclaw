@@ -23,13 +23,13 @@ describe("deepseek provider-policy-api", () => {
         provider: "deepseek",
         modelId: "deepseek-chat",
       }),
-    ).toBe(undefined);
+    ).toBeUndefined();
     expect(
       resolveThinkingProfile({
         provider: "openrouter",
         modelId: "deepseek-v4-pro",
       }),
-    ).toBe(null);
+    ).toBeNull();
   });
 
   it("hydrates contextWindow and cost from catalog for known models", () => {

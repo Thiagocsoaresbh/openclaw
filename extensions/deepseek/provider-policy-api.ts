@@ -6,6 +6,12 @@ import { resolveDeepSeekV4ThinkingProfile } from "./thinking.js";
 type ModelDefinitionDraft = Partial<ModelDefinitionConfig> &
   Pick<ModelDefinitionConfig, "id" | "name">;
 
+export function resolveThinkingProfile(params: { provider: string; modelId: string }) {
+  return params.provider.trim().toLowerCase() === "deepseek"
+    ? resolveDeepSeekV4ThinkingProfile(params.modelId)
+    : null;
+}
+
 /**
  * Build a lookup from the bundled DeepSeek model catalog so we can hydrate
  * missing metadata (contextWindow, cost, maxTokens) into user-configured
@@ -64,19 +70,16 @@ export function normalizeConfig(params: {
     let modelMutated = false;
     const patched: Record<string, unknown> = {};
 
-    // Hydrate contextWindow from catalog when missing or not a positive number.
     if (!isPositiveNumber(raw.contextWindow) && isPositiveNumber(catalogEntry.contextWindow)) {
       patched.contextWindow = catalogEntry.contextWindow;
       modelMutated = true;
     }
 
-    // Hydrate maxTokens from catalog when missing or not a positive number.
     if (!isPositiveNumber(raw.maxTokens) && isPositiveNumber(catalogEntry.maxTokens)) {
       patched.maxTokens = catalogEntry.maxTokens;
       modelMutated = true;
     }
 
-    // Hydrate cost from catalog when missing or when all fields are zero/absent.
     if (!hasCostValues(raw.cost) && hasCostValues(catalogEntry.cost)) {
       patched.cost = catalogEntry.cost;
       modelMutated = true;
@@ -95,10 +98,4 @@ export function normalizeConfig(params: {
   }
 
   return { ...providerConfig, models: nextModels as ModelDefinitionConfig[] };
-}
-
-export function resolveThinkingProfile(params: { provider: string; modelId: string }) {
-  return params.provider.trim().toLowerCase() === "deepseek"
-    ? resolveDeepSeekV4ThinkingProfile(params.modelId)
-    : null;
 }
